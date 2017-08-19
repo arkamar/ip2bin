@@ -26,7 +26,7 @@ void
 usage() {
 	fprintf(stderr, "usage: %s [-fh]\n"
 	"\n"
-	"\t-f force continuation in case of error\n"
+	"\t-f force continuation in case of an error\n"
 	"\t-h this message\n", argv0);
 	exit(1);
 }
