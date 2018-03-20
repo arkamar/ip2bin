@@ -1,0 +1,6 @@
+Tiny utility for transfering ip addresses to binary foramt
+
+```
+127.0.0.1     - 01111111000000000000000000000001
+192.168.0.15  - 11000000101010000000000000001111
+```
