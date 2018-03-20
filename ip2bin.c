@@ -26,6 +26,8 @@ void
 usage() {
 	fprintf(stderr, "usage: %s [-fh]\n"
 	"\n"
+	"\t-4 IPv4 addresses (default)\n"
+	"\t-6 IPv6 addresses\n"
 	"\t-f force continuation in case of an error\n"
 	"\t-h this message\n", argv0);
 	exit(1);
@@ -33,13 +35,11 @@ usage() {
 
 static
 void
-print_bitset_address(const void * address) {
+print_bitset_address(const void * address, const size_t size) {
 	const unsigned char * bytes = address;
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < size; i++) {
 		fwrite(map[bytes[i] >> 0x4], 1, 4, stdout);
 		fwrite(map[bytes[i] &  0xf], 1, 4, stdout);
-		if (i < 3)
-			putchar('.');
 	}
 	putchar('\n');
 }
@@ -49,10 +49,20 @@ main(int argc, char * argv[]) {
 	char * line = NULL;
 	size_t cap = 0;
 	ssize_t len;
-	uint32_t address;
+	struct in6_addr address;
 	int force = EXIT_WHEN_ERROR;
+	int family = AF_INET;
+	size_t addr_size = sizeof(struct in_addr);
 
 	ARGBEGIN {
+	case '4':
+		family = AF_INET;
+		addr_size = sizeof(struct in_addr);
+		break;
+	case '6':
+		family = AF_INET6;
+		addr_size = sizeof(struct in6_addr);
+		break;
 	case 'f':
 		force = CONTINUE_WHEN_ERROR; 
 		break;
@@ -65,9 +75,9 @@ main(int argc, char * argv[]) {
 
 	while ((len = getline(&line, &cap, stdin)) > 0) {
 		line[--len] = '\0';
-		switch (inet_pton(AF_INET, line, &address)) {
+		switch (inet_pton(family, line, &address)) {
 		case 1:
-			print_bitset_address(&address);
+			print_bitset_address(&address, addr_size);
 			break;
 		case 0:
 			fprintf(stderr, "Ivalid address: %s\n", line);
