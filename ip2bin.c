@@ -33,16 +33,14 @@ usage() {
 
 static
 void
-print_bitset_address(const uint32_t address) {
-	const unsigned char * bytes = (void*)&address;
-	fwrite(map[bytes[0] >> 0x4], 1, 4, stdout);
-	fwrite(map[bytes[0] &  0xf], 1, 4, stdout);
-	fwrite(map[bytes[1] >> 0x4], 1, 4, stdout);
-	fwrite(map[bytes[1] &  0xf], 1, 4, stdout);
-	fwrite(map[bytes[2] >> 0x4], 1, 4, stdout);
-	fwrite(map[bytes[2] &  0xf], 1, 4, stdout);
-	fwrite(map[bytes[3] >> 0x4], 1, 4, stdout);
-	fwrite(map[bytes[3] &  0xf], 1, 4, stdout);
+print_bitset_address(const void * address) {
+	const unsigned char * bytes = address;
+	for (int i = 0; i < 4; i++) {
+		fwrite(map[bytes[i] >> 0x4], 1, 4, stdout);
+		fwrite(map[bytes[i] &  0xf], 1, 4, stdout);
+		if (i < 3)
+			putchar('.');
+	}
 	putchar('\n');
 }
 
@@ -69,7 +67,7 @@ main(int argc, char * argv[]) {
 		line[--len] = '\0';
 		switch (inet_pton(AF_INET, line, &address)) {
 		case 1:
-			print_bitset_address(address);
+			print_bitset_address(&address);
 			break;
 		case 0:
 			fprintf(stderr, "Ivalid address: %s\n", line);
